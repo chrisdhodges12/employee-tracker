@@ -169,7 +169,61 @@ addRole = () => {
   );
 };
 
-addEmployee = () => {};
+addEmployeeQuestions = (currentRoles, currentManagers) => {
+  return [
+    {
+      type: "input",
+      name: "firstName",
+      message: "What is employee's first name?"
+    },
+    {
+      type: "input",
+      name: "lastName",
+      message: "What is the employee's last name?"
+    },
+    {
+      type: "list",
+      name: "employeeRole",
+      message: "What is the employee's role?",
+      choices: currentRoles
+    },
+    {
+      type: 'list',
+      name: 'employeeManager',
+      message: 'Who is their manager?',
+      choices: currentManagers
+    },
+  ];
+};
+
+addEmployee = () => {
+  db.query(`SELECT id, title FROM role`,
+  (err, rows) => {
+    const currentRoles = rows.map((row) => {
+      return { value: row.id, name: row.title}
+    });
+
+    db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee WHERE employee.manager_id IS NULL`,
+    (err, rows) => {
+      const currentManagers = rows.map((row) => {
+        return { value: row.id, name: row.name };
+      });
+
+      const askNewEmployee = addEmployeeQuestions(currentRoles, currentManagers);
+      inquirer.prompt(askNewEmployee).then (({ firstName, lastName, employeeRole, employeeManager }) => {
+        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+        db.query(sql, [firstName, lastName, employeeRole, employeeManager], (err, rows) => {
+          if (err) {
+            return;
+          }
+          console.log('');
+          console.log('A new employee has been added!');
+          viewEmployees();
+        });
+      });
+    });
+  });
+};
 
 updateEmployeeRole = () => {};
 
