@@ -3,11 +3,11 @@ const inquirer = require("inquirer");
 const db = require("./db/connection");
 
 function init() {
-  console.log('');
+  console.log("");
   console.log("========================================");
   console.log("=========== EMPLOYEE TRACKER ===========");
   console.log("========================================");
-  console.log('');
+  console.log("");
   initialPrompt();
 }
 
@@ -16,7 +16,7 @@ function initialPrompt() {
     .prompt([
       {
         type: "list",
-        name: "prompt1",
+        name: "main",
         message: "What would you like to do?",
         choices: [
           "View all departments",
@@ -25,30 +25,32 @@ function initialPrompt() {
           "Add a department",
           "Add a role",
           "Add an employee",
-          "Update an employee role",
+          "Update an employee role"
         ],
       },
     ])
     .then((answers) => {
-      if ((answers = "View all departments")) {
+      var { main } = answers;
+
+      if (main === "View all departments") {
         viewDepartments();
       }
-      if ((answers = "View all roles")) {
+      if (main === "View all roles") {
         viewRoles();
       }
-      if ((answers = "View all employees")) {
+      if ((main = "View all employees")) {
         viewEmployees();
       }
-      if ((answers = "Add a department")) {
+      if ((main = "Add a department")) {
         addDepartment();
       }
-      if ((answers = "Add a role")) {
+      if ((main = "Add a role")) {
         addRole();
       }
-      if ((answers = "Add an employee")) {
+      if ((main = "Add an employee")) {
         addEmployee();
       }
-      if ((answers = "Update an employee role")) {
+      if ((main = "Update an employee role")) {
         updateEmployeeRole();
       }
     });
@@ -60,34 +62,34 @@ const viewDepartments = () => {
     if (err) {
       return;
     }
-    console.log('');
+    console.log("");
     console.table(rows);
     initialPrompt();
   });
 };
 
 viewRoles = () => {
-  
+  const sql = `SELECT role.id, role.title, role.salary, department.department_name 
+                AS department FROM role
+                LEFT JOIN department ON role.department_id = department.id`;
+  db.query(sql, (err, rows) => {
+    if (err) {
+      return;
+    }
+    console.log("");
+    console.table(rows);
+    initialPrompt();
+  });
 };
 
-viewEmployees = () => {
+viewEmployees = () => {};
 
-};
+addDepartment = () => {};
 
-addDepartment = () => {
+addRole = () => {};
 
-};
+addEmployee = () => {};
 
-addRole = () => {
-
-};
-
-addEmployee = () => {
-  
-};
-
-updateEmployeeRole = () => {
-
-};
+updateEmployeeRole = () => {};
 
 init();
