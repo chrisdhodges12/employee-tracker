@@ -25,7 +25,7 @@ function initialPrompt() {
           "Add a department",
           "Add a role",
           "Add an employee",
-          "Update an employee role"
+          "Update an employee role",
         ],
       },
     ])
@@ -38,19 +38,19 @@ function initialPrompt() {
       if (main === "View all roles") {
         viewRoles();
       }
-      if ((main === "View all employees")) {
+      if (main === "View all employees") {
         viewEmployees();
       }
-      if ((main === "Add a department")) {
+      if (main === "Add a department") {
         addDepartment();
       }
-      if ((main === "Add a role")) {
+      if (main === "Add a role") {
         addRole();
       }
-      if ((main === "Add an employee")) {
+      if (main === "Add an employee") {
         addEmployee();
       }
-      if ((main === "Update an employee role")) {
+      if (main === "Update an employee role") {
         updateEmployeeRole();
       }
     });
@@ -108,25 +108,66 @@ addDepartment = () => {
   inquirer
     .prompt([
       {
-        type: 'input',
-        name: 'newDep',
-        message: 'What is the name of the department you would like to add?',
+        type: "input",
+        name: "newDep",
+        message: "What is the name of the department you would like to add?",
       },
     ])
-    .then(answer => {
+    .then((answer) => {
       const sql = `INSERT INTO department (department_name) VALUES (?)`;
       db.query(sql, answer.newDep, (err, result) => {
         if (err) {
           return;
         }
-        console.log(""),
-        console.log("A new department was added");
+        console.log(""), console.log("A new department was added!");
         viewDepartments();
       });
     });
 };
 
-addRole = () => {};
+addRoleQuestions = (currentDepartments) => {
+  return [
+    {
+      type: "input",
+      name: "roleTitle",
+      message: "What is the name of the role you would like to add?"
+    },
+    {
+      type: "list",
+      name: "roleDepartment",
+      message: "Which department is the role for?",
+      choices: currentDepartments
+    },
+    {
+      type: 'input',
+      name: 'roleSalary',
+      message: 'What is the salary for this role?',
+    },
+  ];
+};
+
+addRole = () => {
+  db.query(
+    `SELECT id, department_name FROM department`,
+    (err, rows) => {
+      const currentDepartments = rows.map((row) => {
+        return { value: row.id, name: row.department_name };
+      });
+      const askNewRole = addRoleQuestions(currentDepartments);
+      inquirer.prompt(askNewRole).then (({ roleTitle, roleDepartment, roleSalary }) => {
+        const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+        db.query(sql, [roleTitle, roleSalary, roleDepartment], (err, rows) => {
+          if (err) {
+            return;
+          }
+          console.log ('');
+          console.log("A new role was added!");
+          viewRoles();
+        });
+      });
+    }
+  );
+};
 
 addEmployee = () => {};
 
