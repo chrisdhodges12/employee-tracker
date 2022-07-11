@@ -311,27 +311,28 @@ updateEmployeeRole = () => {
 };
 
 viewBudget = () => {
-  db.query(`SELECT id, department_name FROM department`,
-  (err, rows) => {
+  db.query(`SELECT id, department_name FROM department`, (err, rows) => {
     const departments = rows.map((row) => {
       return { value: row.id, name: row.department_name };
-    })
-    inquirer.prompt({
-      type: 'list',
-      name: 'departmentBudget',
-      message: "Select a department to view their budget",
-      choices: departments
-    }).then (({ departmentBudget }) => {
-      const sql = `SELECT SUM(role.salary) AS budget FROM role WHERE  role.department_id = ?`;
-      db.query(sql, departmentBudget, (err, rows) => {
-        if (err) {
-          return;
-        }
-        console.log('');
-        console.table(rows);
-        initialPrompt();
-      });
     });
+    inquirer
+      .prompt({
+        type: "list",
+        name: "departmentBudget",
+        message: "Select a department to view their budget",
+        choices: departments,
+      })
+      .then(({ departmentBudget }) => {
+        const sql = `SELECT SUM(role.salary) AS budget FROM role WHERE  role.department_id = ?`;
+        db.query(sql, departmentBudget, (err, rows) => {
+          if (err) {
+            return;
+          }
+          console.log("");
+          console.table(rows);
+          initialPrompt();
+        });
+      });
   });
 };
 
